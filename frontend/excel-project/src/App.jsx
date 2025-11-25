@@ -12,6 +12,11 @@ function App() {
   const [showConfig, setShowConfig] = useState(false);
   
   // Config mặc định
+  const [fileInputKeys, setFileInputKeys] = useState({
+    leave: 0,
+    attendance: 0
+  });
+
   const [leaveConfig, setLeaveConfig] = useState({
     sheetIndex: 0,
     headerRow: 12,
@@ -50,6 +55,25 @@ function App() {
     if (file && (file.name.endsWith('.xlsx') || file.name.endsWith('.xls'))) {
       handleFileChange(type, file);
     }
+  };
+
+  const handleRemoveFile = (type) => {
+    if (type === 'leave') {
+      setLeaveFile(null);
+      setFileInputKeys((prev) => ({ ...prev, leave: prev.leave + 1 }));
+    } else if (type === 'attendance') {
+      setAttendanceFile(null);
+      setFileInputKeys((prev) => ({ ...prev, attendance: prev.attendance + 1 }));
+    }
+  };
+
+  const handleClearAllFiles = () => {
+    setLeaveFile(null);
+    setAttendanceFile(null);
+    setFileInputKeys((prev) => ({
+      leave: prev.leave + 1,
+      attendance: prev.attendance + 1
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -94,7 +118,12 @@ function App() {
 
   const handleDownload = () => {
     if (result?.downloadUrl) {
-      window.open(`${API_URL}${result.downloadUrl}`, '_blank');
+      // Nếu downloadUrl đã là URL đầy đủ (bắt đầu với http/https), dùng trực tiếp
+      // Nếu không, nối với API_URL (cho trường hợp download từ server)
+      const downloadUrl = result.downloadUrl.startsWith('http://') || result.downloadUrl.startsWith('https://')
+        ? result.downloadUrl
+        : `${API_URL}${result.downloadUrl}`;
+      window.open(downloadUrl, '_blank');
     }
   };
 
@@ -236,7 +265,24 @@ function App() {
                 <div className="file-icon">📄</div>
                 <div className="file-label-text">File Nghỉ Phép (Leave File)</div>
                 <div className="file-name">
-                  {leaveFile ? leaveFile.name : 'Chưa chọn file'}
+                  {leaveFile ? (
+                    <div className="file-details">
+                      <span>{leaveFile.name}</span>
+                      <button
+                        type="button"
+                        className="remove-file-btn"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          handleRemoveFile('leave');
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    'Chưa chọn file'
+                  )}
                 </div>
                 <input
                   type="file"
@@ -244,6 +290,7 @@ function App() {
                   accept=".xlsx,.xls"
                   onChange={(e) => handleFileChange('leave', e.target.files[0])}
                   className="file-input"
+                  key={fileInputKeys.leave}
                 />
               </label>
             </div>
@@ -258,7 +305,24 @@ function App() {
                 <div className="file-icon">📋</div>
                 <div className="file-label-text">File Chấm Công (Attendance File)</div>
                 <div className="file-name">
-                  {attendanceFile ? attendanceFile.name : 'Chưa chọn file'}
+                  {attendanceFile ? (
+                    <div className="file-details">
+                      <span>{attendanceFile.name}</span>
+                      <button
+                        type="button"
+                        className="remove-file-btn"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          handleRemoveFile('attendance');
+                        }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    'Chưa chọn file'
+                  )}
                 </div>
                 <input
                   type="file"
@@ -266,14 +330,25 @@ function App() {
                   accept=".xlsx,.xls"
                   onChange={(e) => handleFileChange('attendance', e.target.files[0])}
                   className="file-input"
+                  key={fileInputKeys.attendance}
                 />
               </label>
             </div>
           </div>
 
-          <button type="submit" className="btn" disabled={loading || !leaveFile || !attendanceFile}>
-            {loading ? 'Đang xử lý...' : 'Kiểm Tra'}
-          </button>
+          <div className="upload-actions">
+            <button type="submit" className="btn" disabled={loading || !leaveFile || !attendanceFile}>
+              {loading ? 'Đang xử lý...' : 'Kiểm Tra'}
+            </button>
+            <button
+              type="button"
+              className="btn secondary"
+              onClick={handleClearAllFiles}
+              disabled={!leaveFile && !attendanceFile}
+            >
+              Xóa tất cả file
+            </button>
+          </div>
         </form>
 
         {loading && (

@@ -6,7 +6,7 @@
 
 .app-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, #9ebd13 0%, #008552 100%);
   padding: 20px;
   display: flex;
   align-items: center;
@@ -93,6 +93,25 @@ h1 {
   margin-top: 10px;
 }
 
+.file-details {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.remove-file-btn {
+  background: transparent;
+  border: none;
+  color: #ff5f6d;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.remove-file-btn:hover {
+  color: #d6001c;
+}
+
 .file-input {
   position: absolute;
   opacity: 0;
@@ -103,7 +122,7 @@ h1 {
 .btn {
   width: 100%;
   padding: 15px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, #f8ff00 0%, #3ad59f 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -122,6 +141,26 @@ h1 {
   background: #ccc;
   cursor: not-allowed;
   transform: none;
+}
+
+.btn.secondary {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn.secondary:hover:not(:disabled) {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.upload-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.upload-actions .btn {
+  flex: 1 1 200px;
 }
 
 .loading {

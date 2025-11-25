@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import './App.css'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/check';
@@ -59,6 +59,16 @@ function App() {
   const [insuranceMappings, setInsuranceMappings] = useState(
     () => defaultInsuranceMappings.map((item) => ({ ...item }))
   );
+  const [toast, setToast] = useState(null);
+  const toastTimeout = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (toastTimeout.current) {
+        clearTimeout(toastTimeout.current);
+      }
+    };
+  }, []);
 
   const handleFileChange = (type, file) => {
     if (file) {
@@ -180,6 +190,16 @@ function App() {
     );
   };
 
+  const showToast = (message, type = 'success') => {
+    if (toastTimeout.current) {
+      clearTimeout(toastTimeout.current);
+    }
+    setToast({ message, type });
+    toastTimeout.current = setTimeout(() => {
+      setToast(null);
+    }, 2500);
+  };
+
   const addMappingRow = () => {
     setInsuranceMappings((prev) => [
       ...prev,
@@ -191,6 +211,7 @@ function App() {
         label: ''
       }
     ]);
+    showToast('Đã thêm cặp cột mới!');
   };
 
   const removeMappingRow = (id) => {
@@ -199,6 +220,7 @@ function App() {
 
   const resetMappingsToDefault = () => {
     setInsuranceMappings(defaultInsuranceMappings.map((item) => ({ ...item })));
+    showToast('Đã khôi phục cấu hình mapping mặc định', 'info');
   };
 
   const handleDownloadFile = (downloadUrl) => {
@@ -219,6 +241,13 @@ function App() {
 
   return (
     <div className="app-container">
+      {toast && (
+        <div className="toast-container">
+          <div className={`toast ${toast.type}`}>
+            {toast.message}
+          </div>
+        </div>
+      )}
       <div className="container">
         <h1>📊 Check Excel Files</h1>
         <p className="subtitle">Upload file nghỉ phép và file chấm công để kiểm tra</p>
@@ -453,6 +482,16 @@ function App() {
                   ))}
                 </div>
               </div>
+            </div>
+
+            <div className="config-actions">
+              <button
+                type="button"
+                className="btn secondary"
+                onClick={() => setShowConfig(false)}
+              >
+                Đóng cấu hình
+              </button>
             </div>
           </div>
         )}

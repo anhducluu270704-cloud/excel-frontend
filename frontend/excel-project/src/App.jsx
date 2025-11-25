@@ -92,9 +92,14 @@ function App() {
     }
   };
 
-  const handleDownload = () => {
+    const handleDownload = () => {
     if (result?.downloadUrl) {
-      window.open(`${API_URL}${result.downloadUrl}`, '_blank');
+      // Nếu downloadUrl đã là URL đầy đủ (bắt đầu với http/https), dùng trực tiếp
+      // Nếu không, nối với API_URL (cho trường hợp download từ server)
+      const downloadUrl = result.downloadUrl.startsWith('http://') || result.downloadUrl.startsWith('https://')
+        ? result.downloadUrl
+        : `${API_URL}${result.downloadUrl}`;
+      window.open(downloadUrl, '_blank');
     }
   };
 

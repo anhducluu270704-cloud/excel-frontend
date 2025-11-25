@@ -76,6 +76,17 @@ function App() {
     }));
   };
 
+  const buildAbsoluteUrl = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    const trimmed = url.trim();
+    if (/^https?:\/\//i.test(trimmed)) {
+      return trimmed;
+    }
+    const base = API_URL.replace(/\/$/, '');
+    const path = trimmed.startsWith('/') ? trimmed : `/${trimmed}`;
+    return `${base}${path}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -97,7 +108,8 @@ function App() {
     formData.append('attendanceFileConfig', JSON.stringify(attendanceConfig));
 
     try {
-      const response = await fetch(`${API_URL}/leave`, {
+      const apiBase = API_URL.replace(/\/$/, '');
+      const response = await fetch(`${apiBase}/leave`, {
         method: 'POST',
         body: formData,
       });
@@ -117,14 +129,19 @@ function App() {
   };
 
   const handleDownload = () => {
-    if (result?.downloadUrl) {
-      // Nếu downloadUrl đã là URL đầy đủ (bắt đầu với http/https), dùng trực tiếp
-      // Nếu không, nối với API_URL (cho trường hợp download từ server)
-      const downloadUrl = result.downloadUrl.startsWith('http://') || result.downloadUrl.startsWith('https://')
-        ? result.downloadUrl
-        : `${API_URL}${result.downloadUrl}`;
-      window.open(downloadUrl, '_blank');
+    if (!result?.downloadUrl) {
+      setError('Không tìm thấy đường dẫn tải xuống.');
+      return;
     }
+
+    const finalUrl = buildAbsoluteUrl(result.downloadUrl);
+
+    if (!finalUrl) {
+      setError('Đường dẫn tải xuống không hợp lệ.');
+      return;
+    }
+
+    window.open(finalUrl, '_blank');
   };
 
   return (
